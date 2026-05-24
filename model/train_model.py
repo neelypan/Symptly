@@ -80,4 +80,57 @@ inputSize = xTrainTensor.shape[1]
 numClasses = len(labelEncoder.classes_)
 model = SymptomClassifier(inputSize, numClasses)
 print(model)
+
+trainDataset = TensorDataset(xTrainTensor, yTrainTensor)
+valDataset = TensorDataset(xValTensor, yValTensor)
+
+trainLoader = DataLoader(trainDataset, batch_size=32, shuffle=True)
+valLoader = DataLoader(valDataset, batch_size=32, shuffle=False)
+
+lossFunc = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+numEpochs = 50
+
+for epoch in range(numEpochs):
+    # Training:
+    model.train()
+    trainLoss, trainCorrect, trainTotal = 0, 0, 0
+    
+    for batchX, batchY in trainLoader:
+        preds = model(batchX)
+        loss = lossFunc(preds, batchY)
+        
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        
+        trainLoss += loss.item()
+        _, predictedClasses = torch.max(preds, 1)
+        trainCorrect += (predictedClasses == batchY).sum().item()
+        trainTotal += batchY.size(0)
+        
+    trainAccuracy = (trainCorrect / trainTotal)*100
+    avgTrainLoss = trainLoss / len(trainLoader)
+    
+    # Validation:
+    model.eval()
+    valLoss, valCorrect, valTotal = 0, 0, 0
+    
+    with torch.no_grad(): # dont track gradients during validation bc they arent needed and it is faster and saved memory
+        for batchX, batchY in valLoader:
+            preds = model(batchX)
+            loss = lossFunc(preds, batchY)
+            
+            valLoss += loss.item()
+            _, predictedClasses = torch.max(preds, 1)
+            valCorrect += (predictedClasses == batchY).sum().item()
+            valTotal += batchY.size(0)
+        
+    valAccuracy = (valCorrect / valTotal) * 100
+    avgValLoss = valLoss / len(valLoader)
+    
+    print(f'Epoch {epoch + 1}/{numEpochs} | '
+          f'Train Loss: {avgTrainLoss:.4f} | Train Accuracy: {trainAccuracy:.2f}% | '
+          f'Val Loss: {avgValLoss:.4f} | Val Accuracy: {valAccuracy:.2f}%')
         
