@@ -36,3 +36,48 @@ with open('model/labelMap.json', 'w') as f:
     json.dump(labelMap, f, indent=2)
 
 print(f'label map saved with {len(labelMap)} classes')
+
+xTrain, xVal, yTrain, yVal = train_test_split(
+    X, yEncoded,
+    test_size=0.2,
+    random_state=42,
+    stratify=yEncoded
+)
+
+print(f"xTrain shape: {xTrain.shape}")   # should be (3936, 132)
+print(f"xVal shape:   {xVal.shape}")     # should be (984, 132)
+print(f"yTrain shape: {yTrain.shape}")   # should be (3936,)
+print(f"yVal shape:   {yVal.shape}")     # should be (984,)
+
+xTrainTensor = torch.tensor(xTrain.values, dtype=torch.float32)
+yTrainTensor = torch.tensor(yTrain, dtype=torch.long)
+xValTensor = torch.tensor(xVal.values, dtype=torch.float32)
+yValTensor = torch.tensor(yVal, dtype=torch.long)
+
+print(f"XTrainTensor shape: {xTrainTensor.shape}, dtype: {xTrainTensor.dtype}")
+print(f"yTrainTensor shape: {yTrainTensor.shape}, dtype: {yTrainTensor.dtype}")
+
+
+class SymptomClassifier(nn.Module):
+    def __init__(self, inputSize, numClasses):
+        super().__init__()
+        self.fc1 = nn.Linear(inputSize, 64)
+        self.fc2 = nn.Linear(64, 32)
+        self.fc3 = nn.Linear(32, numClasses)
+        self.relu = nn.ReLU()
+        self.dropout = nn.Dropout(0.3)
+    
+    def forward(self, x):
+        x = self.relu(self.fc1(x))
+        x = self.dropout(x)
+        x = self.relu(self.fc2(x))
+        x = self.dropout(x)
+        x = self.fc3(x)
+        
+        return x
+
+inputSize = xTrainTensor.shape[1]
+numClasses = len(labelEncoder.classes_)
+model = SymptomClassifier(inputSize, numClasses)
+print(model)
+        
