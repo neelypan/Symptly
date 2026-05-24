@@ -159,3 +159,6 @@ with torch.no_grad():
 
 testAccuracy = (testCorrect / testTotal) * 100
 print(f"Test accuracy: {testAccuracy:.2f}% ({testCorrect}/{testTotal})")
+
+torch.save(model.state_dict(), 'model/symptomClassifier.pt')
+print('model saved to model/symptomClassifier.pt')
