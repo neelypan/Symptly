@@ -133,4 +133,29 @@ for epoch in range(numEpochs):
     print(f'Epoch {epoch + 1}/{numEpochs} | '
           f'Train Loss: {avgTrainLoss:.4f} | Train Accuracy: {trainAccuracy:.2f}% | '
           f'Val Loss: {avgValLoss:.4f} | Val Accuracy: {valAccuracy:.2f}%')
-        
+
+# use the testing dataset to do one final evaluation of the model after training
+testDf = pd.read_csv('data/Testing.csv')
+xTest = testDf.drop(columns=['prognosis'])
+yTest = testDf['prognosis']
+
+yTestEncoded = labelEncoder.transform(yTest)
+
+xTestTensor = torch.tensor(xTest.values, dtype=torch.float32)
+yTestTensor = torch.tensor(yTestEncoded, dtype=torch.long)
+
+print(f"Test set shape: {xTestTensor.shape}")
+
+print('Final Test Eval:')
+
+model.eval()
+testCorrect, testTotal = 0, 0
+
+with torch.no_grad():
+    preds = model(xTestTensor)
+    _, predictedClasses = torch.max(preds, 1)
+    testCorrect = (predictedClasses == yTestTensor).sum().item()
+    testTotal = yTestTensor.size(0)
+
+testAccuracy = (testCorrect / testTotal) * 100
+print(f"Test accuracy: {testAccuracy:.2f}% ({testCorrect}/{testTotal})")
