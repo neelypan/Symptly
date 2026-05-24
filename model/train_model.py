@@ -90,7 +90,7 @@ valLoader = DataLoader(valDataset, batch_size=32, shuffle=False)
 lossFunc = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-numEpochs = 50
+numEpochs = 100
 
 for epoch in range(numEpochs):
     # Training:
