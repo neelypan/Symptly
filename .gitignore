@@ -1,2 +1,4 @@
 venv
 .env
+data/Testing.csv
+data/Training.csv
