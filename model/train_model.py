@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 import json
 from torch.utils.data import DataLoader, TensorDataset
+from SymptomClassifier import SymptomClassifier
 
 # load training data and get rid of extra column made by trailing columns in the csv file
 df = pd.read_csv('data/Training.csv').drop(columns=['Unnamed: 133'])
@@ -15,6 +16,13 @@ print(f'dataframe shape {df.shape}') # verify shape is correct
 # break data into X and y, where X is the symtpoms and y is the disease
 X = df.drop(columns=['prognosis'])
 y = df['prognosis']
+
+symptomList = X.columns.tolist()
+with open('model/symptomList.json', 'w') as f:
+    json.dump(symptomList, f, indent=2)
+
+print('Symptom list saved to model/symptomList')
+
 print(f'(x,y) ({X.shape},{y.shape})') # verify shapes are correct
 # more checks
 print(f'X type: {type(X)}')
@@ -44,10 +52,10 @@ xTrain, xVal, yTrain, yVal = train_test_split(
     stratify=yEncoded
 )
 
-print(f"xTrain shape: {xTrain.shape}")   # should be (3936, 132)
-print(f"xVal shape:   {xVal.shape}")     # should be (984, 132)
-print(f"yTrain shape: {yTrain.shape}")   # should be (3936,)
-print(f"yVal shape:   {yVal.shape}")     # should be (984,)
+print(f"xTrain shape: {xTrain.shape}")   
+print(f"xVal shape:   {xVal.shape}")     
+print(f"yTrain shape: {yTrain.shape}")   
+print(f"yVal shape:   {yVal.shape}")     
 
 xTrainTensor = torch.tensor(xTrain.values, dtype=torch.float32)
 yTrainTensor = torch.tensor(yTrain, dtype=torch.long)
@@ -56,25 +64,6 @@ yValTensor = torch.tensor(yVal, dtype=torch.long)
 
 print(f"XTrainTensor shape: {xTrainTensor.shape}, dtype: {xTrainTensor.dtype}")
 print(f"yTrainTensor shape: {yTrainTensor.shape}, dtype: {yTrainTensor.dtype}")
-
-
-class SymptomClassifier(nn.Module):
-    def __init__(self, inputSize, numClasses):
-        super().__init__()
-        self.fc1 = nn.Linear(inputSize, 64)
-        self.fc2 = nn.Linear(64, 32)
-        self.fc3 = nn.Linear(32, numClasses)
-        self.relu = nn.ReLU()
-        self.dropout = nn.Dropout(0.3)
-    
-    def forward(self, x):
-        x = self.relu(self.fc1(x))
-        x = self.dropout(x)
-        x = self.relu(self.fc2(x))
-        x = self.dropout(x)
-        x = self.fc3(x)
-        
-        return x
 
 inputSize = xTrainTensor.shape[1]
 numClasses = len(labelEncoder.classes_)
