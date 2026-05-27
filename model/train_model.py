@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 import json
 from torch.utils.data import DataLoader, TensorDataset
-from SymptomClassifier import SymptomClassifier
+from model.symptom_classifier import SymptomClassifier
 
 # load training data and get rid of extra column made by trailing columns in the csv file
 df = pd.read_csv('data/Training.csv').drop(columns=['Unnamed: 133'])
