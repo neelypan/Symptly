@@ -297,7 +297,7 @@ h1, h2, h3, p { margin: 0; }
 .selected-count { font-size: 13px; color: var(--text-muted); }
 
 /* ---------- Results ---------- */
-.results-region { margin-top: 8px; }
+.results-region { margin-top: 8px; scroll-margin-top: 16px; }
 .results {
   margin-top: 28px; padding: 28px; border-radius: var(--radius-card);
   background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow);

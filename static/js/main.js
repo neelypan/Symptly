@@ -171,8 +171,9 @@
           }
           var data = res.data;
           if (mode === 'new') {
-            // First check-in created the episode; load it to show saved results.
-            window.location = '/episode/' + data.episodeId;
+            // first check-in made the episode; reload to it. the #results hash tells the
+            // loaded page to scroll down to the predictions (see initial render below).
+            window.location = '/episode/' + data.episodeId + '#results';
             return;
           }
           renderResult(resultsRegion, data);
@@ -193,7 +194,7 @@
               autoDismiss: 10000
             });
           }
-          resultsRegion.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          resultsRegion.scrollIntoView({ behavior: 'smooth', block: 'start' });
         })
         .catch(function () {
           showToast({ title: 'Network error', msg: 'Could not reach the server.', autoDismiss: 5000 });
@@ -209,6 +210,14 @@
       var init = window.SYMPTLY_INITIAL;
       if (init.emergency) renderResult(resultsRegion, { isEmergency: true, emergency: init.emergency, predictions: init.predictions });
       else if (init.predictions && init.predictions.length) renderResult(resultsRegion, { predictions: init.predictions });
+      // if we got here straight from "get predictions" (the #results hash), scroll down to
+      // the results. plain episode revisits have no hash, so they stay at the top.
+      var hasResults = init.emergency || (init.predictions && init.predictions.length);
+      if (hasResults && window.location.hash === '#results') {
+        requestAnimationFrame(function () {
+          resultsRegion.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
     }
 
     updateCount();
