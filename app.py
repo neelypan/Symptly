@@ -30,6 +30,7 @@ def devUserId(email):
     return str(uuid.uuid5(uuid.NAMESPACE_URL, 'symptly-user:' + email.strip().lower()))
 
 
+# gate a route behind being logged in
 def loginRequired(view):
     @wraps(view)
     def wrapper(*args, **kwargs):
@@ -89,6 +90,7 @@ def decorateEpisode(episode):
     episode['isStale'] = isStale(episode)
     return episode
 
+# shared logic for the first check-in (new episode) and every one after it
 def runCheckin(episode, newSymptoms, isFirst=False):
     episodeId = episode['id']
     userId = episode['user_id']
@@ -102,6 +104,7 @@ def runCheckin(episode, newSymptoms, isFirst=False):
 
     checkin = db.addCheckin(episodeId, newSymptoms, predictions)
 
+    # flag it when the new symptoms dont share a body system with whats already here
     overlap = True
     if not isFirst and existing and newSymptoms:
         overlap = systemsOverlap(existing, newSymptoms)
@@ -120,6 +123,7 @@ def runCheckin(episode, newSymptoms, isFirst=False):
         'checkinId': checkin['id'],
     }
 
+# runs on every page so the sidebar always has the latest episode lists
 @app.context_processor
 def injectSidebar():
     active, resolved = [], []
@@ -189,6 +193,7 @@ def episodeNew():
         result = runCheckin(episode, symptoms, isFirst=True)
         result['episodeId'] = episode['id']
         return jsonify(result)
+    # preselect symptoms handed over from "switch to new issue" (?symptoms=a,b,c)
     prefill = [s for s in (request.args.get('symptoms') or '').split(',') if s]
     return render_template('new_episode.html',
                            symptomGroups=getBodySystemGroups(),
@@ -226,6 +231,7 @@ def episodeCheckin(episodeId):
     return jsonify(runCheckin(episode, symptoms, isFirst=False))
 
 
+# undo a check-in, used when the user moves unrelated symptoms to a new issue
 @app.route('/episode/<episodeId>/checkin/<checkinId>', methods=['DELETE'])
 @loginRequired
 def episodeCheckinDelete(episodeId, checkinId):

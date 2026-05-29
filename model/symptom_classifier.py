@@ -1,14 +1,16 @@
 import torch.nn as nn
 
+# simple feedforward net: symptom vector in, one score per disease out
 class SymptomClassifier(nn.Module):
     def __init__(self, inputSize, numClasses):
         super().__init__()
+        # two hidden layers, dropout in between to fight overfitting on the small dataset
         self.fc1 = nn.Linear(inputSize, 64)
         self.fc2 = nn.Linear(64, 32)
         self.fc3 = nn.Linear(32, numClasses)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(0.3)
-    
+
     def forward(self, x):
         x = self.relu(self.fc1(x))
         x = self.dropout(x)

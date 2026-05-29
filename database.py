@@ -9,6 +9,7 @@ load_dotenv()
 SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_KEY = os.getenv('SUPABASE_KEY')
 
+# real supabase client if its configured, otherwise fall back to an in-memory dict so the app still runs
 _client = None
 _useFallback = False
 _store = {'episodes': {}, 'checkins': {}}
@@ -74,6 +75,7 @@ def getEpisode(episodeId, userId):
     return res.data[0] if res.data else None
 
 
+# one check-in = a round of symptoms plus the predictions they produced
 def addCheckin(episodeId, symptoms, predictions):
     createdAt = _nowIso()
     if _useFallback:
@@ -91,6 +93,7 @@ def addCheckin(episodeId, symptoms, predictions):
     return res.data[0]
 
 
+# remove a single check-in (and the symptoms it added) from an episode
 def deleteCheckin(checkinId, episodeId):
     if _useFallback:
         row = _store['checkins'].get(checkinId)

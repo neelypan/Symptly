@@ -108,6 +108,7 @@
     var resultsRegion = document.getElementById('resultsRegion');
     var noResults = document.getElementById('noResults');
 
+    // ids picked this session — locked chips (from a previous check-in) are left out
     function selectedIds() {
       return Array.prototype.map.call(
         groups.querySelectorAll('.chip--selected:not(.chip--locked)'),

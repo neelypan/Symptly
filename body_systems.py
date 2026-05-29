@@ -102,6 +102,7 @@ SYMPTOM_TO_SYSTEM = {
 }
 
 
+# which body systems a set of symptoms touches (unknown ones fall back to 'general')
 def getBodySystems(symptoms):
     systems = set()
     for s in symptoms:
@@ -109,10 +110,13 @@ def getBodySystems(symptoms):
     return systems
 
 
+# do two symptom sets share a body system? used to guess if new symptoms belong to the same issue
 def systemsOverlap(symptomsA, symptomsB):
+    # drop 'general' since its too vague to judge overlap on
     systemsA = getBodySystems(symptomsA) - {'general'}
     systemsB = getBodySystems(symptomsB) - {'general'}
 
+    # if either side is only general symptoms we cant tell, so assume related
     if not systemsA or not systemsB:
         return True
 

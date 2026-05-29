@@ -32,16 +32,16 @@ EMERGENCY_RESPONSE = {
     )
 }
 
-
+# if any emergency symptom shows up we skip the AI and tell them to get help
 def checkForEmergency(symptoms):
     if not symptoms:
         return None
-    
+
     matched = [s for s in symptoms if s in EMERGENCY_SYMPTOMS]
-    
+
     if matched:
         res = EMERGENCY_RESPONSE.copy()
-        res['matchedSymptoms'] = matched
+        res['matchedSymptoms'] = matched  # so the UI can show which ones triggered it
         return res
-    
+
     return None
