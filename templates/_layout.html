@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Symptly{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <script>
+    // Set theme before paint to avoid a flash of the wrong palette.
+    (function () {
+      try {
+        var t = localStorage.getItem('symptly-theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div class="app{% if not session.get('userId') %} no-sidebar{% endif %}" id="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__top">
+        <button class="icon-btn" id="sidebarToggle" title="Collapse sidebar" aria-label="Collapse sidebar">
+          <i data-lucide="panel-left"></i>
+        </button>
+        <a href="{{ url_for('episodes') }}" class="logo">
+          <span class="logo__word">Symptly</span><span class="logo__dot"></span>
+        </a>
+      </div>
+
+      <a href="{{ url_for('episodeNew') }}" class="btn btn--primary btn--block new-issue-btn">
+        <i data-lucide="plus"></i><span class="label">New health issue</span>
+      </a>
+
+      <nav class="sidebar__nav">
+        <div class="nav-section">
+          <div class="nav-section__head">
+            <i data-lucide="activity"></i><span class="label">Active</span>
+          </div>
+          {% if sidebarActive %}
+            <ul class="episode-list">
+              {% for ep in sidebarActive %}
+                <li>
+                  <a class="episode-item{% if request.path == url_for('episodeView', episodeId=ep.id) %} is-current{% endif %}"
+                     href="{{ url_for('episodeView', episodeId=ep.id) }}" title="{{ ep.title }}">
+                    <span class="status-dot status-dot--active"></span>
+                    <span class="episode-item__body">
+                      <span class="episode-item__title">{{ ep.title }}</span>
+                      <span class="episode-item__date">{{ ep.displayDate }}</span>
+                    </span>
+                    {% if ep.isStale %}<i data-lucide="alert-circle" class="stale-badge" title="Active over 7 days"></i>{% endif %}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="nav-empty label">No active issues</p>
+          {% endif %}
+        </div>
+
+        {% if sidebarResolved %}
+          <div class="nav-section">
+            <button class="nav-section__head nav-section__head--toggle" id="resolvedToggle">
+              <i data-lucide="check-circle"></i><span class="label">Resolved</span>
+              <i data-lucide="chevron-down" class="chevron label"></i>
+            </button>
+            <ul class="episode-list" id="resolvedList">
+              {% for ep in sidebarResolved %}
+                <li>
+                  <a class="episode-item is-resolved{% if request.path == url_for('episodeView', episodeId=ep.id) %} is-current{% endif %}"
+                     href="{{ url_for('episodeView', episodeId=ep.id) }}" title="{{ ep.title }}">
+                    <span class="status-dot status-dot--resolved"></span>
+                    <span class="episode-item__body">
+                      <span class="episode-item__title">{{ ep.title }}</span>
+                      <span class="episode-item__date">{{ ep.displayDate }}</span>
+                    </span>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+      </nav>
+
+      <div class="sidebar__footer">
+        <button class="icon-btn" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">
+          <i data-lucide="moon" class="theme-icon-dark"></i>
+          <i data-lucide="sun" class="theme-icon-light"></i>
+        </button>
+        {% if currentEmail %}
+          <span class="footer-email label" title="{{ currentEmail }}">{{ currentEmail }}</span>
+        {% endif %}
+        <a href="{{ url_for('logout') }}" class="icon-btn" title="Log out" aria-label="Log out">
+          <i data-lucide="log-out"></i>
+        </a>
+      </div>
+    </aside>
+
+    <div class="main-wrap">
+      <div class="disclaimer">
+        <i data-lucide="info"></i>
+        <span>Educational tool. Not medical advice.</span>
+      </div>
+      <main class="main">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="flash">
+              {% for m in messages %}<p>{{ m }}</p>{% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <div class="toast-region" id="toastRegion"></div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

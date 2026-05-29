@@ -1,0 +1,66 @@
+{% extends "_layout.html" %}
+{% block title %}Your issues · Symptly{% endblock %}
+
+{% block content %}
+{% set staleActive = sidebarActive | selectattr('isStale') | list %}
+<div class="page" data-stagger>
+  <header class="page-head">
+    <h1 class="page-title">Your health issues</h1>
+    <a href="{{ url_for('episodeNew') }}" class="btn btn--primary">
+      <i data-lucide="plus"></i> New health issue
+    </a>
+  </header>
+
+  {% if staleActive %}
+    <div class="banner banner--warning" data-stagger-item>
+      <i data-lucide="alert-circle"></i>
+      <div>
+        <strong>Some issues have been active for over a week.</strong>
+        <p>If symptoms persist or worsen, it's a good time to check in with a doctor.</p>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if not sidebarActive and not sidebarResolved %}
+    <div class="empty-state" data-stagger-item>
+      <div class="empty-state__icon"><i data-lucide="activity"></i></div>
+      <h2>Let's track your first health issue</h2>
+      <p>Record symptoms over time, get educational insights, and keep a clear
+         history to share with your doctor.</p>
+      <a href="{{ url_for('episodeNew') }}" class="btn btn--primary btn--lg">
+        <i data-lucide="plus"></i> Start new health issue
+      </a>
+    </div>
+  {% else %}
+    {% if sidebarActive %}
+      <section class="card-grid" data-stagger-item>
+        {% for ep in sidebarActive %}
+          <a class="issue-card" href="{{ url_for('episodeView', episodeId=ep.id) }}">
+            <div class="issue-card__head">
+              <span class="pill pill--active"><span class="status-dot status-dot--active"></span> Active</span>
+              {% if ep.isStale %}<i data-lucide="alert-circle" class="stale-badge" title="Active over 7 days"></i>{% endif %}
+            </div>
+            <h3 class="issue-card__title">{{ ep.title }}</h3>
+            <p class="issue-card__date">Started {{ ep.displayDate }}</p>
+          </a>
+        {% endfor %}
+      </section>
+    {% endif %}
+
+    {% if sidebarResolved %}
+      <h2 class="section-title" data-stagger-item>Resolved</h2>
+      <section class="card-grid" data-stagger-item>
+        {% for ep in sidebarResolved %}
+          <a class="issue-card issue-card--resolved" href="{{ url_for('episodeView', episodeId=ep.id) }}">
+            <div class="issue-card__head">
+              <span class="pill pill--resolved"><i data-lucide="check"></i> Resolved</span>
+            </div>
+            <h3 class="issue-card__title">{{ ep.title }}</h3>
+            <p class="issue-card__date">Started {{ ep.displayDate }}</p>
+          </a>
+        {% endfor %}
+      </section>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign in · Symptly</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('symptly-theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body class="auth-body">
+  <div class="auth-shell">
+    <div class="auth-card">
+      <div class="logo logo--lg">
+        <span class="logo__word">Symptly</span><span class="logo__dot"></span>
+      </div>
+      <h1 class="auth-title">Track what your body is telling you</h1>
+      <p class="auth-sub">Sign in to start a private symptom journal.</p>
+
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="flash">{% for m in messages %}<p>{{ m }}</p>{% endfor %}</div>
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('login') }}" class="auth-form">
+        <label class="field-label" for="email">Email</label>
+        <input class="input" type="email" id="email" name="email" placeholder="you@example.com"
+               autocomplete="email" required autofocus />
+        <button type="submit" class="btn btn--primary btn--block">Continue</button>
+      </form>
+
+      <p class="auth-foot">Educational tool. Not medical advice.</p>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>if (window.lucide) lucide.createIcons();</script>
+</body>
+</html>

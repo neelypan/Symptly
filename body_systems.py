@@ -112,10 +112,93 @@ def getBodySystems(symptoms):
 def systemsOverlap(symptomsA, symptomsB):
     systemsA = getBodySystems(symptomsA) - {'general'}
     systemsB = getBodySystems(symptomsB) - {'general'}
-    
-
 
     if not systemsA or not systemsB:
         return True
-    
+
     return bool(systemsA & systemsB)
+
+
+
+import os
+import json
+
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+with open(os.path.join(_SCRIPT_DIR, 'model', 'symptomList.json'), 'r') as _f:
+    SYMPTOM_LIST = json.load(_f)
+
+SYSTEM_ORDER = [
+    'respiratory', 'cardiovascular', 'neurological', 'digestive',
+    'urinary', 'musculoskeletal', 'skin', 'general',
+]
+SYSTEM_LABELS = {
+    'respiratory': 'Respiratory',
+    'cardiovascular': 'Cardiovascular',
+    'neurological': 'Neurological',
+    'digestive': 'Digestive',
+    'urinary': 'Urinary',
+    'musculoskeletal': 'Musculoskeletal',
+    'skin': 'Skin',
+    'general': 'General',
+}
+SYSTEM_ICONS = {
+    'respiratory': 'wind',
+    'cardiovascular': 'heart',
+    'neurological': 'brain',
+    'digestive': 'utensils',
+    'urinary': 'droplets',
+    'musculoskeletal': 'bone',
+    'skin': 'hand',
+    'general': 'stethoscope',
+}
+
+_NAME_OVERRIDES = {
+    'dischromic _patches': 'Discolored patches',
+    'spotting_ urination': 'Spotting during urination',
+    'foul_smell_of urine': 'Foul-smelling urine',
+    'toxic_look_(typhos)': 'Toxic appearance',
+    'scurring': 'Scarring',
+    'cold_hands_and_feets': 'Cold hands and feet',
+    'continuous_feel_of_urine': 'Constant urge to urinate',
+    'swelled_lymph_nodes': 'Swollen lymph nodes',
+    'swollen_extremeties': 'Swollen extremities',
+    'extra_marital_contacts': 'Extramarital contact',
+    'fluid_overload.1': 'Fluid overload',
+}
+
+_HIDDEN_IDS = {'fluid_overload.1'}
+
+
+def cleanSymptomName(symptom):
+    if symptom in _NAME_OVERRIDES:
+        return _NAME_OVERRIDES[symptom]
+    label = ' '.join(symptom.replace('_', ' ').split())
+    return label[:1].upper() + label[1:] if label else symptom
+
+
+def getSystemForSymptom(symptom):
+    return SYMPTOM_TO_SYSTEM.get(symptom, 'general')
+
+
+def getBodySystemGroups():
+    buckets = {sys: [] for sys in SYSTEM_ORDER}
+    for symptom in SYMPTOM_LIST:
+        if symptom in _HIDDEN_IDS:
+            continue
+        system = getSystemForSymptom(symptom)
+        buckets.setdefault(system, []).append({
+            'id': symptom,
+            'label': cleanSymptomName(symptom),
+        })
+
+    groups = []
+    for system in SYSTEM_ORDER:
+        items = sorted(buckets.get(system, []), key=lambda s: s['label'])
+        if items:
+            groups.append({
+                'system': system,
+                'label': SYSTEM_LABELS[system],
+                'icon': SYSTEM_ICONS[system],
+                'symptoms': items,
+            })
+    return groups

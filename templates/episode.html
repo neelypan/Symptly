@@ -1,0 +1,50 @@
+{% extends "_layout.html" %}
+{% block title %}{{ episode.title }} · Symptly{% endblock %}
+
+{% block content %}
+<div class="page" data-stagger>
+  <header class="page-head page-head--episode">
+    <div>
+      <a href="{{ url_for('episodes') }}" class="breadcrumb"><i data-lucide="chevron-left"></i> All issues</a>
+      <h1 class="page-title">{{ episode.title }}</h1>
+      <p class="page-sub">Started {{ episode.displayDate }}</p>
+    </div>
+    <div class="page-head__actions">
+      {% if episode.status == 'active' %}
+        <span class="pill pill--active"><span class="status-dot status-dot--active"></span> Active</span>
+        <button class="btn btn--ghost" id="resolveBtn"
+                data-endpoint="{{ url_for('episodeResolve', episodeId=episode.id) }}">
+          <i data-lucide="check"></i> Resolve
+        </button>
+      {% else %}
+        <span class="pill pill--resolved"><i data-lucide="check"></i> Resolved</span>
+      {% endif %}
+    </div>
+  </header>
+
+  {% if episode.isStale %}
+    <div class="banner banner--warning" data-stagger-item>
+      <i data-lucide="alert-circle"></i>
+      <div>
+        <strong>This issue has been active for over a week.</strong>
+        <p>If it isn't improving, consider booking time with a doctor.</p>
+      </div>
+    </div>
+  {% endif %}
+
+  <div data-stagger-item>
+    {% set endpoint = url_for('episodeCheckin', episodeId=episode.id) %}
+    {% set mode = 'existing' %}
+    {% include "_symptom_form.html" %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.SYMPTLY_INITIAL = {
+    predictions: {{ latestPredictions | tojson }},
+    emergency: {{ emergency | tojson }}
+  };
+</script>
+{% endblock %}

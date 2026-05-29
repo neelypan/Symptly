@@ -1,0 +1,48 @@
+{# Shared symptom picker + results region. Expects: symptomGroups, endpoint,
+   mode ('new'|'existing'), and optionally existingSymptoms (list of ids). #}
+{% set existingSymptoms = existingSymptoms | default([]) %}
+{% set prefillSymptoms = prefillSymptoms | default([]) %}
+<div class="checker" id="checker" data-endpoint="{{ endpoint }}" data-mode="{{ mode }}">
+  <div class="symptom-search">
+    <i data-lucide="search"></i>
+    <input id="symptomSearch" class="input" type="text" placeholder="Search symptoms…" autocomplete="off" />
+  </div>
+
+  {% if existingSymptoms %}
+    <p class="prev-note"><i data-lucide="history"></i> Dimmed symptoms were recorded in a previous check-in.</p>
+  {% endif %}
+
+  <div class="symptom-groups" id="symptomGroups">
+    {% for g in symptomGroups %}
+      <section class="sym-group" data-system="{{ g.system }}">
+        <div class="sym-group__head">
+          <i data-lucide="{{ g.icon }}"></i>
+          <h3>{{ g.label }}</h3>
+        </div>
+        <div class="chips">
+          {% for s in g.symptoms %}
+            {% set isPrev = s.id in existingSymptoms %}
+            {% set isPrefill = not isPrev and s.id in prefillSymptoms %}
+            <button type="button"
+                    class="chip{% if isPrev %} chip--selected chip--locked{% elif isPrefill %} chip--selected{% endif %}"
+                    data-id="{{ s.id }}" data-label="{{ s.label | lower }}"
+                    {% if isPrev %}disabled aria-disabled="true" title="From a previous check-in"{% endif %}>
+              {{ s.label }}
+            </button>
+          {% endfor %}
+        </div>
+      </section>
+    {% endfor %}
+    <p class="no-results" id="noResults" hidden>No symptoms match your search.</p>
+  </div>
+
+  <div class="checker__actions">
+    <button class="btn btn--primary btn--lg" id="predictBtn" type="button">
+      <span class="btn__spinner" aria-hidden="true"></span>
+      <span class="btn__label">Get predictions</span>
+    </button>
+    <span class="selected-count" id="selectedCount"></span>
+  </div>
+
+  <div class="results-region" id="resultsRegion" aria-live="polite"></div>
+</div>

@@ -1,0 +1,20 @@
+{% extends "_layout.html" %}
+{% block title %}New health issue · Symptly{% endblock %}
+
+{% block content %}
+<div class="page" data-stagger>
+  <header class="page-head">
+    <div>
+      <a href="{{ url_for('episodes') }}" class="breadcrumb"><i data-lucide="chevron-left"></i> All issues</a>
+      <h1 class="page-title">New health issue</h1>
+      <p class="page-sub">Select the symptoms you're experiencing, then get suggestions.</p>
+    </div>
+  </header>
+
+  <div data-stagger-item>
+    {% set endpoint = url_for('episodeNew') %}
+    {% set mode = 'new' %}
+    {% include "_symptom_form.html" %}
+  </div>
+</div>
+{% endblock %}
